@@ -1,4 +1,4 @@
-# qRisk
+# DSPy Risk Assessment
 
 This repository contains a collection of Python scripts that demonstrate different approaches to implementing an AI-powered risk assessment system using the DSPy framework. The project focuses on analyzing financial information of loan applicants and providing risk assessments.
 
