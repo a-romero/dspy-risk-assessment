@@ -1,3 +1,5 @@
+# type: ignore
+
 import json
 import dspy
 from dspy import ChainOfThought
@@ -5,6 +7,25 @@ from dspy.teleprompt import BootstrapFewShot
 from typing import List, Optional
 import pandas as pd
 from dsp import Claude
+
+# Initialize the language model
+#worker = dspy.OpenAI(model="gpt-3.5-turbo", model_type="chat", max_tokens=3000)
+worker = Claude(model="claude-3-5-sonnet-20240620", max_tokens=3000)
+#worker = dspy.Cohere(model="command-r-plus", max_tokens=3000)
+#worker = dspy.HFModel(model = 'mistralai/Mistral-7B-Instruct-v0.2')
+dspy.configure(lm=worker)
+dspy.settings.configure(backoff_time = 60)
+
+# Input data
+applicant_info = """
+Name: John Doe
+Age: 35
+Annual Income: $75,000
+Credit Score: 720
+Existing Debts: $20,000 in student loans, $5,000 in credit card debt
+Loan Amount Requested: $250,000 for a home mortgage
+Employment: Software Engineer at Tech Corp for 5 years
+"""
 
 class RiskAssessment(dspy.Signature):
     """Analyze the applicant's financial information and return a risk assessment."""
@@ -14,12 +35,9 @@ class RiskAssessment(dspy.Signature):
 
 class RiskAssessmentAgent(dspy.Module):
     def __init__(self, role: str, 
-                 #tools: Optional[List]
                  ):
         self.role = role
         self.question = "Analyze the applicant's financial information and return a risk assessment."
-        #self.tools = tools
-        #self.tool_descriptions = "\n".join([f"- {t.name}: {t.description}. To use this tool please provide: `{t.requires}`" for t in tools])
         self.assess_risk = ChainOfThought(RiskAssessment, n=3)
     def forward(self, applicant:str):
         question = self.question
@@ -46,42 +64,25 @@ def risk_assessment_metric(gold, pred, trace=None):
         correct =  dspy.Predict(Assess)(assessed_text=risk_assessment, assessment_question=correct)
         complete = dspy.Predict(Assess)(assessed_text=risk_assessment, assessment_question=complete)
 
-    print(f"Applicant: {applicant}, Answer: {risk_assessment}, Risk Assessment: {risk_assessment}, Correct: {correct.assessment_answer}, Complete: {complete.assessment_answer}")
     correct, complete = [m.assessment_answer.split()[0].lower() == 'yes' for m in [correct, complete]]
     score = (correct + complete) if correct else 0
 
     if trace is not None: return score >= 2
     return score / 2.0
 
-
-# Initialize the language model
-#worker = dspy.OpenAI(model="gpt-3.5-turbo", model_type="chat", max_tokens=3000)
-worker = Claude(model="claude-3-5-sonnet-20240620", max_tokens=3000)
-#worker = dspy.Cohere(model="command-r-plus", max_tokens=3000)
-#worker = dspy.HFModel(model = 'mistralai/Mistral-7B-Instruct-v0.2')
-dspy.configure(lm=worker)
-dspy.settings.configure(backoff_time = 60)
-
-applicant_info = """
-Name: John Doe
-Age: 35
-Annual Income: $75,000
-Credit Score: 720
-Existing Debts: $20,000 in student loans, $5,000 in credit card debt
-Loan Amount Requested: $250,000 for a home mortgage
-Employment: Software Engineer at Tech Corp for 5 years
-"""
-
 # Load the training data
 dataset = json.load(open("data/training_data.json", "r"))['examples']
-trainset = [dspy.Example(question="Analyze the applicant's financial information and return a risk assessment", applicant=e['applicant'], answer=e['answer']) for e in dataset]
+trainset = [dspy.Example(question="Analyze the applicant's financial information and return a risk assessment", 
+                         applicant=e['applicant'], 
+                         answer=e['answer']) for e in dataset]
 
 risk_assessment_agent_role = "Risk Assessment Officer"
 
 bfs_trainset = [x.with_inputs('applicant') for x in trainset]
 config = dict(max_bootstrapped_demos=4, max_labeled_demos=4)
 bfs_optimized = BootstrapFewShot(metric=risk_assessment_metric, **config)
-bfs_optimized_advisor = bfs_optimized.compile(RiskAssessmentAgent(role=risk_assessment_agent_role),trainset=bfs_trainset)
+bfs_optimized_advisor = bfs_optimized.compile(RiskAssessmentAgent(role=risk_assessment_agent_role),
+                                              trainset=bfs_trainset)
 response = bfs_optimized_advisor(applicant_info)
 print(f"BootstrapFewShot Optimised response:\n {response}")
 

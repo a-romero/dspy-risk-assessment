@@ -1,3 +1,5 @@
+# type: ignore
+
 import json
 import dspy
 from dspy.evaluate import Evaluate
@@ -7,28 +9,6 @@ from typing import List, Optional
 import pandas as pd
 from dsp import Claude
 
-class RiskAssessment(dspy.Signature):
-    """Analyze the applicant's financial information and return a risk assessment."""
-    question = dspy.InputField()
-    applicant = dspy.InputField()
-    answer = dspy.OutputField(desc="A thorough risk analysis about the applicant, justifying the assessment through each of the parameters considered from the applicant")
-
-class RiskAssessmentAgent(dspy.Module):
-    def __init__(self, role: str, 
-                 #tools: Optional[List]
-                 ):
-        self.role = role
-        self.question = "Analyze the applicant's financial information and return a risk assessment."
-        #self.tools = tools
-        #self.tool_descriptions = "\n".join([f"- {t.name}: {t.description}. To use this tool please provide: `{t.requires}`" for t in tools])
-        self.assess_risk = ChainOfThought(RiskAssessment, n=3)
-    def forward(self, applicant:str):
-        question = self.question
-        applicant = applicant
-        pred = self.assess_risk(question=question, applicant=applicant)
-
-        return dspy.Prediction(answer = pred.answer)
-
 # Initialize the language model
 #worker = dspy.OpenAI(model="gpt-3.5-turbo", model_type="chat", max_tokens=3000)
 worker = Claude(model="claude-3-5-sonnet-20240620", max_tokens=3000)
@@ -37,6 +17,7 @@ worker = Claude(model="claude-3-5-sonnet-20240620", max_tokens=3000)
 dspy.configure(lm=worker)
 dspy.settings.configure(backoff_time = 60)
 
+# Input data
 applicant_info = """
 Name: John Doe
 Age: 35
@@ -47,14 +28,41 @@ Loan Amount Requested: $250,000 for a home mortgage
 Employment: Software Engineer at Tech Corp for 5 years
 """
 
+class RiskAssessment(dspy.Signature):
+    """Analyze the applicant's financial information and return a risk assessment."""
+    question = dspy.InputField()
+    applicant = dspy.InputField()
+    answer = dspy.OutputField(desc="""
+                              A thorough risk analysis about the applicant, justifying the assessment 
+                              for each of the parameters considered from the applicant
+                              """
+                              )
+
+class RiskAssessmentAgent(dspy.Module):
+    def __init__(self, role: str, 
+                 ):
+        self.role = role
+        self.question = "Analyze the applicant's financial information and return a risk assessment."
+        self.assess_risk = ChainOfThought(RiskAssessment, n=3)
+    def forward(self, applicant:str):
+        question = self.question
+        applicant = applicant
+        pred = self.assess_risk(question=question, applicant=applicant)
+
+        return dspy.Prediction(answer = pred.answer)
+
 # Load the training data
 dataset = json.load(open("data/training_data.json", "r"))['examples']
-trainset = [dspy.Example(question="Analyze the applicant's financial information and return a risk assessment", applicant=e['applicant'], answer=e['answer']) for e in dataset]
+trainset = [dspy.Example(question="Analyze the applicant's financial information and return a risk assessment", 
+                         applicant=e['applicant'], 
+                         answer=e['answer']) for e in dataset]
 
 risk_assessment_agent_role = "Risk Assessment Officer"
-# train
+
+# Train
 teleprompter = LabeledFewShot()
-lfs_optimized_advisor = teleprompter.compile(RiskAssessmentAgent(role=risk_assessment_agent_role), trainset=trainset[3:])
+lfs_optimized_advisor = teleprompter.compile(RiskAssessmentAgent(role=risk_assessment_agent_role), 
+                                             trainset=trainset[3:])
 
 response = lfs_optimized_advisor(applicant_info)
 print(f"LabeledFewShot Optimised response:\n {response}")
