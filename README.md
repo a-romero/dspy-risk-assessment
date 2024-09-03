@@ -14,11 +14,12 @@ This repository contains a collection of Python scripts that demonstrate differe
 
 ## Overview
 
-This project showcases three different approaches to implementing a risk assessment AI:
+This project showcases four different approaches to implementing a risk assessment AI:
 
 1. Bootstrap Few-Shot Learning
 2. Labeled Few-Shot Learning
 3. Zero-Shot Learning
+4. MIPRO
 
 Each approach uses the DSPy framework and various language models to analyze applicant information and provide risk assessments for loan applications.
 
