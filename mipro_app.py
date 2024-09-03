@@ -1,9 +1,7 @@
-# type: ignore
-
 import json
 import dspy
 from dspy import ChainOfThought
-from dspy.teleprompt import BootstrapFewShot
+from dspy.teleprompt import MIPROv2
 from typing import List, Optional
 import pandas as pd
 from dsp import Claude
@@ -78,15 +76,20 @@ trainset = [dspy.Example(question="Analyze the applicant's financial information
 
 risk_assessment_agent_role = "Risk Assessment Officer"
 
-bfs_trainset = [x.with_inputs('applicant') for x in trainset]
-config = dict(max_bootstrapped_demos=4, max_labeled_demos=4)
-bfs_optimized = BootstrapFewShot(metric=risk_assessment_metric, **config)
-bfs_optimized_advisor = bfs_optimized.compile(RiskAssessmentAgent(role=risk_assessment_agent_role),
-                                              trainset=bfs_trainset)
-response = bfs_optimized_advisor(applicant_info)
-print(f"BootstrapFewShot Optimised response:\n {response}")
+mipro_trainset = [x.with_inputs('applicant') for x in trainset]
+config = dict(num_candidates=1)
+eval_kwargs = dict(num_threads=1, display_progress=True, display_table=0)
+mipro_optimized = MIPROv2(metric=risk_assessment_metric, **config)
+mipro_optimized_advisor = mipro_optimized.compile(RiskAssessmentAgent(role=risk_assessment_agent_role),
+                                              trainset=mipro_trainset,
+                                              max_bootstrapped_demos=1,
+                                              max_labeled_demos=1,
+                                              eval_kwargs=eval_kwargs
+                                              )
+response = mipro_optimized_advisor(applicant_info)
+print(f"MIPRO Optimised response:\n {response}")
 
 prompt_used = worker.inspect_history(n=1)
 print(f"Prompt used: {prompt_used}")
 
-bfs_optimized_advisor.save('bfs_optimized_advisor_compiled.json')
+mipro_optimized_advisor.save('mipro_optimized_advisor_compiled.json')
