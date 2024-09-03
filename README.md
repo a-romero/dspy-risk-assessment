@@ -27,6 +27,7 @@ Each approach uses the DSPy framework and various language models to analyze app
 - `zero_shot_app.py`: Implements the Zero-Shot learning approach.
 - `labeled_few_shot_app.py`: Implements the Labeled Few-Shot learning approach.
 - `bootstrap_few_shot_app.py`: Implements the Bootstrap Few-Shot learning approach.
+- `mipro_app.py`: Implements the MIPRO learning approach.
 
 ## Installation
 
