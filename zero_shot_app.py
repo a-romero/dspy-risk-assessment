@@ -24,6 +24,7 @@ Loan Amount Requested: $250,000 for a home mortgage
 Employment: Software Engineer at Tech Corp for 5 years
 """
 
+
 class ZeroShot(dspy.Module):
     """
     You are given a piece of text that contains information about an applicant. 
@@ -33,8 +34,8 @@ class ZeroShot(dspy.Module):
         super().__init__()
         self.prog = dspy.Predict("question -> answer")
 
-    def forward(self, question):
-        return self.prog(question="Analyze the applicant's financial information and return a risk assessment. Applicant: " + question)
+    def forward(self, applicant):
+        return self.prog(question="Analyze the applicant's financial information and return a risk assessment. Applicant: " + applicant)
 
 
 module = ZeroShot()

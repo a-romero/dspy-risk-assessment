@@ -1,7 +1,7 @@
 import json
 import dspy
 from dspy import ChainOfThought
-from dspy.teleprompt import MIPROv2
+from dspy.teleprompt import MIPRO, MIPROv2
 from typing import List, Optional
 import pandas as pd
 from dsp import Claude
@@ -12,8 +12,9 @@ worker = Claude(model="claude-3-5-sonnet-20240620", max_tokens=3000)
 #worker = dspy.Cohere(model="command-r-plus", max_tokens=3000)
 #worker = dspy.HFModel(model = 'mistralai/Mistral-7B-Instruct-v0.2')
 dspy.configure(lm=worker)
-dspy.configure(trace=[])
+dspy.settings.configure(trace=[])
 dspy.settings.configure(backoff_time = 60)
+dspy.settings.configure(lm=worker)
 
 # Input data
 applicant_info = """
@@ -33,7 +34,8 @@ class RiskAssessment(dspy.Signature):
     answer = dspy.OutputField(desc="A thorough risk analysis about the applicant, justifying the assessment through each of the parameters considered from the applicant")
 
 class RiskAssessmentAgent(dspy.Module):
-    def __init__(self, role: str
+    def __init__(self, 
+                 role: str
                  ):
         super().__init__()
         self.role = role
@@ -77,19 +79,28 @@ trainset = [dspy.Example(question="Analyze the applicant's financial information
 
 risk_assessment_agent_role = "Risk Assessment Officer"
 
-mipro_trainset = [x.with_inputs('applicant') for x in trainset[:3]]
-mipro_valset = [x.with_inputs('applicant') for x in trainset[3:6]]
+mipro_trainset = [x.with_inputs('applicant') for x in trainset]
 config = dict(prompt_model=worker, task_model=worker, num_candidates=2, init_temperature=0.1)
 eval_kwargs = dict(num_threads=1, display_progress=True, display_table=0)
 mipro_optimized = MIPROv2(metric=risk_assessment_metric, **config)
 mipro_optimized_advisor = mipro_optimized.compile(RiskAssessmentAgent(role=risk_assessment_agent_role),
                                               trainset=mipro_trainset,
-                                              valset=mipro_valset,
                                               max_bootstrapped_demos=2,
                                               max_labeled_demos=2,
                                               num_batches=2,
                                               eval_kwargs=eval_kwargs
                                               )
+
+# Use MIPRO rather than MIPROv2
+#mipro_optimized = MIPRO(metric=risk_assessment_metric, **config)
+#mipro_optimized_advisor = mipro_optimized.compile(RiskAssessmentAgent(role=risk_assessment_agent_role),
+#                                              trainset=mipro_trainset,
+#                                              max_bootstrapped_demos=2,
+#                                              max_labeled_demos=2,
+#                                              num_trials=2,
+#                                              eval_kwargs=eval_kwargs
+#                                              )
+
 response = mipro_optimized_advisor(applicant_info)
 print(f"MIPRO Optimised response:\n {response}")
 
