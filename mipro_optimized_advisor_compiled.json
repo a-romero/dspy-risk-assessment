@@ -1,0 +1,25 @@
+{
+  "assess_risk": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "question": "Analyze the applicant's financial information and return a risk assessment.",
+        "applicant": "Name: John Smith\nAge: 35\nAnnual Income: $80,000\nCredit Score: 750\nExisting Debts: $0\nLoan Amount Requested: $50,000 for a car loan\nEmployment: Software Engineer at XYZ Corp for 5 years",
+        "rationale": "produce the answer. We start by evaluating each aspect of John Smith's financial profile to determine the level of risk associated with lending him the requested car loan. \n\n1. **Age (35)**: John is in his mid-30s, an age where individuals typically have stable careers and financial responsibilities. This age factor suggests a neutral to positive risk, as he is likely to have gained financial experience.\n\n2. **Annual Income ($80,000)**: This is a solid income level, especially for a single person or a household with moderate financial obligations, indicating a strong ability to repay the loan. This reduces the perceived risk.\n\n3. **Credit Score (750)**: A credit score of 750 is considered excellent, suggesting that John has a history of managing his credit responsibly and is unlikely to default on the loan.\n\n4. **Existing Debts ($0)**: With no existing debts, John's debt-to-income ratio is extremely low, which significantly lowers the risk and shows he has no current financial burdens that could interfere with new loan obligations.\n\n5. **Loan Amount Requested ($50,000)**: The requested amount is reasonable compared to his income and zero existing debt, making it manageable and further lowering the risk.\n\n6. **Employment (5 years as a Software Engineer at XYZ Corp)**: Five years of employment in a stable and high-demand field like software engineering at a presumably reputable company indicates job stability and consistent income, which are strong positive factors.",
+        "answer": "Based on the analysis, John Smith presents a Low risk for the $50,000 car loan. The primary factors driving this assessment include his high income, excellent credit score, zero existing debt, and stable employment in a lucrative industry. The requested loan amount is reasonable in proportion to his financial profile, and his age suggests financial maturity. Overall, he appears to be a highly reliable candidate for the loan, with all indicators pointing towards a low likelihood of default."
+      },
+      {
+        "question": "Analyze the applicant's financial information and return a risk assessment",
+        "applicant": "Name: Emily White\nAge: 55\nAnnual Income: $150,000\nCredit Score: 800\nExisting Debts: $20,000 in auto loans\nLoan Amount Requested: $100,000 for home renovations\nEmployment: Senior manager at a large corporation for 20 years",
+        "answer": "Based on the analysis of Emily White's financial information, the risk assessment is Low Risk. This assessment is justified by the following factors: 1. High Annual Income: Emily's $150,000 annual income provides a strong foundation for loan repayment. 2. Excellent Credit Score: Her credit score of 800 indicates a history of responsible credit management, reducing the risk of default. 3. Stable Employment: 20 years as a senior manager at a large corporation suggests job stability and consistent income. 4. Manageable Existing Debt: While she has $20,000 in auto loans, this is relatively low compared to her income. 5. Strong Debt-to-Income Ratio: Even with the new loan, her debt-to-income ratio is likely to remain within acceptable limits due to her high income. 6. Strategic Loan Purpose: Home renovations can potentially increase property value, making this a strategic investment. 7. Age and Financial Maturity: At 55, Emily is likely to have significant financial experience and stability. However, there are a few minor considerations: 1. Loan Size: The $100,000 loan is substantial, which slightly increases risk. 2. Approaching Retirement: At 55, long-term loan repayment plans should consider potential changes in income near retirement age. Overall, Emily White presents a low risk profile for the requested loan, with her high income, excellent credit score, and stable employment outweighing the minor risk factors."
+      }
+    ],
+    "signature_instructions": "Analyze the applicant's financial information and return a risk assessment.",
+    "signature_prefix": "Answer:",
+    "extended_signature_instructions": "Analyze the provided financial information of the applicant and deliver a comprehensive risk assessment, including a detailed rationale for each parameter considered.",
+    "extended_signature_prefix": "Answer:"
+  }
+}
