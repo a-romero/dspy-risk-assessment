@@ -5,30 +5,21 @@ This repository contains a collection of Python scripts that demonstrate differe
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Files](#files)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Models](#models)
-6. [Training Data](#training-data)
-7. [Evaluation](#evaluation)
+2. [Installation](#installation)
+3. [Models](#models)
+4. [Training Data](#training-data)
+5. [Evaluation](#evaluation)
 
 ## Overview
 
 This project showcases four different approaches to implementing a risk assessment AI:
 
-1. Bootstrap Few-Shot Learning
-2. Labeled Few-Shot Learning
-3. Zero-Shot Learning
-4. MIPRO
+1. Zero-Shot
+2. Labeled Few-Shot
+3. Bootstrap Few-Shot
+4. MIPROv2
 
 Each approach uses the DSPy framework and various language models to analyze applicant information and provide risk assessments for loan applications.
-
-## Files
-
-- `zero_shot_app.py`: Implements the Zero-Shot learning approach.
-- `labeled_few_shot_app.py`: Implements the Labeled Few-Shot learning approach.
-- `bootstrap_few_shot_app.py`: Implements the Bootstrap Few-Shot learning approach.
-- `mipro_app.py`: Implements the MIPRO learning approach.
 
 ## Installation
 
@@ -37,18 +28,8 @@ To run these scripts, you'll need to install the required dependencies. Create a
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-pip install dspy pandas dsp-ml
+pip install -r requirements.txt
 ```
-
-## Usage
-
-To run any of the scripts, use the following command:
-
-```bash
-python <script_name>.py
-```
-
-Replace `<script_name>` with the name of the script you want to run (e.g., `bootstrap_few_shot_app.py`).
 
 ## Models
 
@@ -67,7 +48,7 @@ The Bootstrap Few-Shot and Labeled Few-Shot approaches use training data stored 
 
 ## Evaluation
 
-The Bootstrap Few-Shot approach includes a custom evaluation metric `risk_assessment_metric` that assesses the quality of the generated risk assessments based on correctness and completeness.
+The Bootstrap Few-Shot and MIPROv2 approaches include a custom evaluation metric `risk_assessment_metric_adv` that assesses the quality of the generated risk assessments based on Bias, Answer Relevancy and Coherence using Deepeval (https://github.com/confident-ai/deepeval). The latter is a custom metric using G-Eval, an advanced evaluation framework for language models that uses LLM-as-a-judge along for tailor-made criteria and evaluation steps and leverages the probabilities of the LLM output tokens to normalize the score through a weighted average.
 
 
 ---
